@@ -10,6 +10,9 @@ population=np.array(population).reshape(population_size,16,4)
 gates=['and','or','buffer','nor','nand','xor','xnor']
 fitness=[]
 answer=[]
+final_result=[]
+alpha=1000
+beta=1.8
 
 def Binary(decimal_number):
   binary_array=[0]*4
@@ -187,21 +190,42 @@ def findcelloutput(population,inputs):
 
   return population
 
-def findfitness(population):
+transistor_dict={
+   'and':6
+   ,'or':6
+   ,'buffer':0
+   ,'nor':4
+   ,'nand':4
+   ,'xnor':14
+   , 'xor':12
+}
+
+
+def find_score(crom):
+
+    score=0
+    for i in range(16):
+      # print(crom[i][2])
+      score+=transistor_dict[(crom[i][2])]
+
+    return score
+
+def findfitness(population,alpha,beta):
    global inputs
    global answer
-   fitness1=[0]*len(population)
+   true_out=[0]*len(population)
+   fitness=[0]*len(population)
    for i in range(16):
       findcelloutput(population,inputs[i])
       for circuit in range(len(population)):
         if population[circuit][15][3]==output[i]:
-          fitness1[circuit]+=1
-          if fitness1[circuit]==16:
-            answer.append(population[circuit])
-   return fitness1
+          true_out[circuit]+=1
+          if true_out[circuit]==16:
+            answer.append([population[circuit],(true_out[circuit]/16)*alpha - (beta*find_score(population[circuit]))])
+        fitness[circuit]=(true_out[circuit]/16)*alpha - (beta*find_score(population[circuit]))
+   return fitness
 
-fitness=findfitness(population)
-
+fitness=findfitness(population,alpha,beta)
 
 
 
@@ -257,26 +281,6 @@ def mutation(population):
 
 
 
-final_result=[]
-
-dict={
-   'and':6
-   ,'or':6
-   ,'buffer':0
-   ,'nor':4
-   ,'nand':4
-   ,'xnor':14 
-   , 'xor':12
-}
-
-
-def find_score(crom):
-
-    score=0
-    for i in range(16):
-      score=score+dict[crom[i][2]]
-    return score
-
 
 for epoch in range(1000):
   elitism1=elitism(population,fitness)
@@ -285,19 +289,9 @@ for epoch in range(1000):
   population=mutation(population)
   population=np.concatenate((population,elitism1))
 
-  fitness=findfitness(population)
+  fitness=findfitness(population,alpha,beta)
   print("max fitness: ",max(fitness))
   if len(answer)>=100 :
     break
 
-
-
-for i,crom in enumerate(answer):
-  score=find_score(crom)
-  final_result.append([crom,score])
- 
-
-
-# print(in_out)
-# print(answer)
-print(final_result)
+print(answer)
