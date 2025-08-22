@@ -1,1 +1,2 @@
-# finding-the-best-and-optimal-circuit-with-genetic-algorithm
+#genetic-algorithm 
+finding-the-best-and-optimal-circuit-with-genetic-algorithm
